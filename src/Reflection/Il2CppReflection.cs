@@ -906,15 +906,17 @@ public class Il2CppReflection : ReflectionUtility
 
     static IEnumerator<DictionaryEntry> EnumerateCppHashTable(Il2CppSystem.Collections.Hashtable hashtable)
     {
-        for (int i = 0; i < hashtable.buckets.Count; i++)
+        // Unity 6000.5's corlib renamed Hashtable's private bucket storage, so go through its public enumerator
+        Il2CppSystem.Collections.IDictionaryEnumerator enumerator = hashtable.GetEnumerator();
+        Il2CppSystem.Collections.IEnumerator mover = enumerator.Cast<Il2CppSystem.Collections.IEnumerator>();
+        while (mover.MoveNext())
         {
-            Il2CppSystem.Collections.Hashtable.bucket bucket = hashtable.buckets[i];
-            if (bucket == null || bucket.key == null)
+            if (enumerator.Key == null)
             {
                 continue;
             }
 
-            yield return new DictionaryEntry(bucket.key, bucket.val);
+            yield return new DictionaryEntry(enumerator.Key, enumerator.Value);
         }
     }
 
