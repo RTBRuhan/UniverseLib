@@ -29,12 +29,36 @@ namespace UniverseLib.Runtime.Il2Cpp
 
         protected internal override Texture2D Internal_NewTexture2D(int width, int height)
         {
-            return new(width, height, TextureFormat.RGBA32, false);
+            try
+            {
+                return NewTexture2DWithMipCount(width, height, TextureFormat.RGBA32, 1);
+            }
+            catch (MissingMethodException)
+            {
+                // Unity 6000.5+ removed the (int, int, TextureFormat, int, bool, IntPtr) constructor
+                return new(width, height, TextureFormat.RGBA32, false);
+            }
         }
 
         protected internal override Texture2D Internal_NewTexture2D(int width, int height, TextureFormat textureFormat, bool mipChain)
         {
-            return new(width, height, textureFormat, mipChain);
+            try
+            {
+                return NewTexture2DWithMipCount(width, height, textureFormat, mipChain ? -1 : 1);
+            }
+            catch (MissingMethodException)
+            {
+                // Unity 6000.5+ removed the (int, int, TextureFormat, int, bool, IntPtr) constructor
+                return new(width, height, textureFormat, mipChain);
+            }
+        }
+
+        // Kept in its own non-inlined method: the MissingMethodException is thrown when this method is JIT-compiled,
+        // so the try/catch has to be in the caller
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static Texture2D NewTexture2DWithMipCount(int width, int height, TextureFormat textureFormat, int mipCount)
+        {
+            return new(width, height, textureFormat, mipCount, false, IntPtr.Zero);
         }
 
         protected internal override void Internal_Blit(Texture tex, RenderTexture rt)
