@@ -906,11 +906,16 @@ public class Il2CppReflection : ReflectionUtility
 
     static IEnumerator<DictionaryEntry> EnumerateCppHashTable(Il2CppSystem.Collections.Hashtable hashtable)
     {
-        // Unity 6000.5's corlib no longer exposes Hashtable.buckets, so enumerate the Hashtable itself
-        foreach (Il2CppSystem.Object item in hashtable.Cast<Il2CppSystem.Collections.IEnumerable>())
+        Il2CppSystem.Collections.IEnumerable enumerable = hashtable.TryCast<Il2CppSystem.Collections.IEnumerable>();
+        if (enumerable == null)
         {
-            Il2CppSystem.Collections.DictionaryEntry entry = item.Cast<Il2CppSystem.Collections.DictionaryEntry>();
-            if (entry.Key == null)
+            yield break;
+        }
+
+        foreach (Il2CppSystem.Object item in enumerable)
+        {
+            Il2CppSystem.Collections.DictionaryEntry entry = item?.TryCast<Il2CppSystem.Collections.DictionaryEntry>();
+            if (entry == null || entry.Key == null)
             {
                 continue;
             }

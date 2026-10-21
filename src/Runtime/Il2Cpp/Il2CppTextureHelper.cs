@@ -31,11 +31,10 @@ namespace UniverseLib.Runtime.Il2Cpp
         {
             try
             {
-                return NewTexture2DWithMipCount(width, height, TextureFormat.RGBA32, 1);
+                return NewTexture2DLegacy(width, height, TextureFormat.RGBA32, 1);
             }
             catch (MissingMethodException)
             {
-                // Unity 6000.5+ removed the (int, int, TextureFormat, int, bool, IntPtr) constructor
                 return new(width, height, TextureFormat.RGBA32, false);
             }
         }
@@ -44,19 +43,17 @@ namespace UniverseLib.Runtime.Il2Cpp
         {
             try
             {
-                return NewTexture2DWithMipCount(width, height, textureFormat, mipChain ? -1 : 1);
+                return NewTexture2DLegacy(width, height, textureFormat, mipChain ? -1 : 1);
             }
             catch (MissingMethodException)
             {
-                // Unity 6000.5+ removed the (int, int, TextureFormat, int, bool, IntPtr) constructor
                 return new(width, height, textureFormat, mipChain);
             }
         }
 
-        // Kept in its own non-inlined method: the MissingMethodException is thrown when this method is JIT-compiled,
-        // so the try/catch has to be in the caller
+        // Separate method: MissingMethodException is thrown when the calling method is JIT-compiled
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        static Texture2D NewTexture2DWithMipCount(int width, int height, TextureFormat textureFormat, int mipCount)
+        static Texture2D NewTexture2DLegacy(int width, int height, TextureFormat textureFormat, int mipCount)
         {
             return new(width, height, textureFormat, mipCount, false, IntPtr.Zero);
         }
